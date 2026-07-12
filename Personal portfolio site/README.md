@@ -28,10 +28,12 @@ No frameworks or build tools — everything runs directly in the browser.
 ## Project Structure
 
 ```
+├── README.md
 ├── index.html          # Page structure and section containers
 ├── resume-data.js       # All content — the only file that needs editing for updates
 ├── script.js            # Renders data into the DOM, handles interactions & animations
 └── style.css             # Design system and layout
+├── Output mp4
 ```
 
 ## Updating Content
