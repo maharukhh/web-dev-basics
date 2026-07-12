@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mahrukh Owais — Robotics & Intelligent Systems Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- background blueprint grid -->
+  <div class="grid-backdrop" aria-hidden="true"></div>
+
+  <!-- ===== NAV ===== -->
+  <header class="nav">
+    <div class="nav-brand"><span class="brand-mark">/&gt;</span> Mahrukh Owais</div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Menu">☰</button>
+    <nav id="nav-links">
+      <a href="#about">About</a>
+      <a href="#experience">Experience</a>
+      <a href="#projects">Projects</a>
+      <a href="#skills">Skills</a>
+      <a href="#certifications">Certifications</a>
+      <a href="#contact" class="nav-cta">Contact</a>
+    </nav>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="hero-content reveal">
+      <h1 id="hero-name"></h1>
+      <p class="hero-role" id="hero-role"></p>
+      <p class="hero-tagline" id="hero-tagline"></p>
+      <div class="hero-actions">
+        <a href="#projects" class="btn btn-primary">View Work</a>
+        <a href="#contact" class="btn btn-outline">Get In Touch</a>
+      </div>
+    </div>
+    <div class="hero-visual reveal" aria-hidden="false">
+      <div class="ambient-blob blob-1"></div>
+      <div class="ambient-blob blob-2"></div>
+      <div class="slideshow" id="hero-slideshow">
+        <div class="slideshow-track" id="slideshow-track"></div>
+        <div class="slideshow-dots" id="slideshow-dots"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ABOUT ===== -->
+  <section id="about" class="section">
+    <h2 class="reveal">About</h2>
+    <p class="about-text reveal" id="about-text"></p>
+  </section>
+
+  <!-- ===== EXPERIENCE / EDUCATION ===== -->
+  <section id="experience" class="section">
+    <h2 class="reveal">Experience &amp; Education</h2>
+    <div class="timeline" id="timeline"></div>
+  </section>
+
+  <!-- ===== PROJECTS ===== -->
+  <section id="projects" class="section">
+    <h2 class="reveal">Projects</h2>
+    <p class="about-text reveal" id="projects-subtitle" style="margin-bottom: 32px;"></p>
+    <div class="filter-tabs reveal" id="filter-tabs"></div>
+    <div class="project-grid" id="project-grid"></div>
+  </section>
+
+  <!-- ===== SKILLS ===== -->
+  <section id="skills" class="section">
+    <h2 class="reveal">Skills</h2>
+    <div class="skills-groups" id="skills-groups"></div>
+  </section>
+
+  <!-- ===== CERTIFICATIONS & LANGUAGES ===== -->
+  <section id="certifications" class="section">
+    <h2 class="reveal">Certifications &amp; Languages</h2>
+    <div class="cert-lang-grid">
+      <div class="cert-list reveal" id="cert-list"></div>
+      <div class="lang-list reveal" id="lang-list"></div>
+    </div>
+  </section>
+
+  <!-- ===== CONTACT ===== -->
+  <section id="contact" class="section contact">
+    <h2 class="reveal">Let's build something</h2>
+    <p class="about-text reveal">Open to robotics engineering, automation, and autonomous systems opportunities.</p>
+    <div class="contact-links reveal" id="contact-links"></div>
+  </section>
+
+  <footer class="footer">
+    <p>&copy; <span id="year"></span> <span id="footer-name"></span> · Karachi, Pakistan</p>
+  </footer>
+
+  <script src="resume-data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
