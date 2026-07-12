@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Countdown Timer</title>
+<style>
+  :root {
+    --bg-deep: #0a0e14;
+    --bg-panel: #10161f;
+    --line: #1f2b38;
+    --amber: #ffb648;
+    --cyan: #4fd8e0;
+    --text-dim: #6b8299;
+    --text-bright: #e8f0f5;
+    --danger: #ff5f56;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient(ellipse at top, #121a24 0%, var(--bg-deep) 60%);
+    font-family: 'Courier New', ui-monospace, monospace;
+    color: var(--text-bright);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .console {
+    width: 100%;
+    max-width: 620px;
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.02), 0 20px 60px rgba(0,0,0,0.5);
+    overflow: hidden;
+  }
+
+  .mission-name {
+    font-size: 15px;
+    color: var(--amber);
+    letter-spacing: 0.03em;
+    margin-bottom: 22px;
+    min-height: 20px;
+  }
+
+  .setup-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+  }
+
+  input[type="text"], input[type="datetime-local"] {
+    flex: 1;
+    min-width: 140px;
+    background: #0c1119;
+    border: 1px solid var(--line);
+    color: var(--text-bright);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 10px 12px;
+    border-radius: 4px;
+    outline: none;
+  }
+  input:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 1px var(--cyan);
+  }
+  input::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
+
+  .btn {
+    background: var(--cyan);
+    color: #04141a;
+    border: none;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 10px 18px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .btn:hover { filter: brightness(1.1); }
+  .btn:active { transform: translateY(1px); }
+  .btn.secondary {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--line);
+  }
+  .btn.secondary:hover { color: var(--text-bright); border-color: var(--text-dim); }
+
+  .readout {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .unit {
+    background: #0c1119;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 14px 6px 10px;
+    text-align: center;
+  }
+
+  .unit .num {
+    font-size: clamp(28px, 7vw, 42px);
+    font-weight: 700;
+    color: var(--text-bright);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  .unit.pulse .num { color: var(--amber); }
+
+  .unit .lbl {
+    margin-top: 8px;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  .progress-track {
+    height: 4px;
+    background: #0c1119;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    border: 1px solid var(--line);
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--cyan), var(--amber));
+    transition: width 0.5s linear;
+  }
+
+  .log {
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 0.02em;
+    min-height: 18px;
+  }
+  .log.launch-text {
+    color: var(--danger);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+
+  .presets {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+  }
+  .chip {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    padding: 6px 11px;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+  .chip:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  @media (max-width: 420px) {
+    .readout { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="console">
+  <div class="body-pad">
+
+    <h1 class="title">Countdown Timer</h1>
+
+    <p class="subtitle" id="missionLabel">Set a target date and time</p>
+    <div class="eyebrow">Target</div>
+    <div class="mission-name" id="missionLabel">Set a target date and time</div>
+
+    <div class="setup-row">
+      <input type="text" id="missionInput" placeholder="Event name (optional)" maxlength="40">
+    </div>
+    <div class="setup-row">
+      <input type="datetime-local" id="targetInput">
+      <button class="btn" id="startBtn">Start Count</button>
+      <button class="btn secondary" id="resetBtn">Reset</button>
+    </div>
+
+    <div class="presets">
+      <button class="chip" data-mins="5">5 Minutes</button>
+      <button class="chip" data-mins="15">15 Minutes</button>
+      <button class="chip" data-mins="60">1 Hour</button>
+      <button class="chip" data-mins="1440">24 Hours</button>
+    </div>
+
+    <div class="readout">
+      <div class="unit"><div class="num" id="days">00</div><div class="lbl">Days</div></div>
+      <div class="unit"><div class="num" id="hours">00</div><div class="lbl">Hrs</div></div>
+      <div class="unit"><div class="num" id="mins">00</div><div class="lbl">Min</div></div>
+      <div class="unit pulse"><div class="num" id="secs">00</div><div class="lbl">Sec</div></div>
+    </div>
+
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+    <div class="log" id="logLine">Waiting to start...</div>
+  </div>
+</div>
+
+<script>
+  const missionInput = document.getElementById('missionInput');
+  const targetInput = document.getElementById('targetInput');
+  const startBtn = document.getElementById('startBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const missionLabel = document.getElementById('missionLabel');
+  
+  
+  
+  const logLine = document.getElementById('logLine');
+  const progressFill = document.getElementById('progressFill');
+  const chips = document.querySelectorAll('.chip');
+
+  const els = {
+    days: document.getElementById('days'),
+    hours: document.getElementById('hours'),
+    mins: document.getElementById('mins'),
+    secs: document.getElementById('secs'),
+  };
+
+  let targetTime = null;
+  let startTime = null;
+  let tickHandle = null;
+  let launched = false;
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  
+  function startCountdown(target, label) {
+    targetTime = target;
+    startTime = Date.now();
+    launched = false;
+    missionLabel.textContent = label || 'Countdown Timer';
+    logLine.className = 'log';
+    logLine.textContent = 'Countdown in progress...';
+    
+    if (tickHandle) clearInterval(tickHandle);
+    tickHandle = setInterval(tick, 1000);
+    tick();
+  }
+
+  function tick() {
+    const now = Date.now();
+    const remaining = targetTime - now;
+
+    if (remaining <= 0 && !launched) {
+      launched = true;
+      els.days.textContent = '00';
+      els.hours.textContent = '00';
+      els.mins.textContent = '00';
+      els.secs.textContent = '00';
+      progressFill.style.width = '100%';
+      
+      logLine.className = 'log launch-text';
+      logLine.textContent = 'Countdown Completed!';
+      clearInterval(tickHandle);
+      return;
+    }
+
+    const totalSecs = Math.floor(remaining / 1000);
+    const d = Math.floor(totalSecs / 86400);
+    const h = Math.floor((totalSecs % 86400) / 3600);
+    const m = Math.floor((totalSecs % 3600) / 60);
+    const s = totalSecs % 60;
+
+    els.days.textContent = pad(d);
+    els.hours.textContent = pad(h);
+    els.mins.textContent = pad(m);
+    els.secs.textContent = pad(s);
+
+    const totalSpan = targetTime - startTime;
+    const elapsed = now - startTime;
+    const pct = Math.min(100, Math.max(0, (elapsed / totalSpan) * 100));
+    progressFill.style.width = pct + '%';
+  }
+
+  startBtn.addEventListener('click', () => {
+    if (!targetInput.value) {
+      logLine.textContent = 'Enter a target date and time first.';
+      return;
+    }
+    const target = new Date(targetInput.value).getTime();
+    if (isNaN(target)) {
+      logLine.textContent = 'Invalid target time.';
+      return;
+    }
+    startCountdown(target, missionInput.value.trim());
+  });
+
+  resetBtn.addEventListener('click', () => {
+    if (tickHandle) clearInterval(tickHandle);
+    targetTime = null;
+    launched = false;
+    missionLabel.textContent = 'Set a target date and time';
+    els.days.textContent = '00';
+    els.hours.textContent = '00';
+    els.mins.textContent = '00';
+    els.secs.textContent = '00';
+    progressFill.style.width = '0%';
+    logLine.className = 'log';
+    logLine.textContent = 'Waiting to start...';
+    
+  });
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const mins = parseInt(chip.dataset.mins, 10);
+      const target = Date.now() + mins * 60 * 1000;
+      const label = mins===1440 ? '24 Hours' : mins===60 ? '1 Hour' : `${mins} Minutes`;
+      missionInput.value = label;
+      targetInput.value = new Date(target).toISOString().slice(0, 16);
+      startCountdown(target, label);
+    });
+  });
+
+  
+  
+  
+</script>
+
+</body>
+</html>
