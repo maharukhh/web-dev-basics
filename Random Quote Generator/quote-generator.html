@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mahrukh's website | Quotes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink-navy: #1c2430;
+    --card: #faf6ee;
+    --card-line: #ded4c0;
+    --text-main: #2b2620;
+    --text-dim: #7d7364;
+    --forest: #33513f;
+    --forest-soft: #4f7360;
+    --gold: #b8925a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--ink-navy);
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(255,255,255,0.03) 0, transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(255,255,255,0.03) 0, transparent 40%);
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 560px;
+    background: var(--card);
+    border-radius: 4px;
+    box-shadow: 0 30px 70px rgba(0,0,0,0.45);
+    padding: 48px 44px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 5px;
+    height: 100%;
+    background: var(--forest);
+  }
+
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .eyebrow::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--card-line);
+  }
+
+  .mark {
+    font-family: 'Playfair Display', serif;
+    font-size: 64px;
+    color: var(--forest-soft);
+    line-height: 0.5;
+    margin-bottom: 6px;
+    opacity: 0.5;
+  }
+
+  #quoteText {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(22px, 4vw, 28px);
+    line-height: 1.45;
+    color: var(--text-main);
+    margin-bottom: 26px;
+    min-height: 90px;
+    transition: opacity 0.3s ease;
+  }
+
+  .author-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 34px;
+    transition: opacity 0.3s ease;
+  }
+  .author-row::before {
+    content: "";
+    width: 26px;
+    height: 1px;
+    background: var(--gold);
+  }
+  #quoteAuthor {
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+    font-weight: 500;
+  }
+  #quoteTag {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--forest-soft);
+    background: rgba(51,81,63,0.1);
+    padding: 3px 9px;
+    border-radius: 20px;
+  }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .btn-new {
+    background: var(--forest);
+    color: #f4efe4;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.03em;
+    padding: 13px 26px;
+    border-radius: 30px;
+    cursor: pointer;
+  }
+  .btn-new:hover { background: var(--forest-soft); }
+  .btn-new:active { transform: translateY(1px); }
+
+  .icon-actions { display: flex; gap: 8px; }
+  .icon-btn {
+    background: transparent;
+    border: 1px solid var(--card-line);
+    color: var(--text-dim);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .icon-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .icon-btn.copied { color: var(--forest); border-color: var(--forest); }
+
+  .counter {
+    text-align: center;
+    margin-top: 22px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.35);
+  }
+</style>
+</head>
+<body>
+
+<div>
+  <div class="card">
+    <div class="eyebrow">Mahrukh's website quote — No. <span id="quoteNumber">01</span></div>
+    <div class="mark">“</div>
+    <div id="quoteText">Loading a first line…</div>
+    <div class="author-row">
+      <span id="quoteAuthor"></span>
+      <span id="quoteTag"></span>
+    </div>
+    <div class="controls">
+      <button class="btn-new" id="newBtn">Next Quote</button>
+      <div class="icon-actions">
+        <button class="icon-btn" id="copyBtn" title="Copy quote">⧉</button>
+      </div>
+    </div>
+  </div>
+  <div class="counter">DRAWN FROM A COLLECTION OF <span id="totalCount">0</span></div>
+</div>
+
+<script>
+  const quotes = [
+    { text: "The only way to do great work is to love what you do.", author: "Steve Jobs", tag: "Work" },
+    { text: "In the middle of difficulty lies opportunity.", author: "Albert Einstein", tag: "Perspective" },
+    { text: "It is our choices that show what we truly are, far more than our abilities.", author: "J.K. Rowling", tag: "Character" },
+    { text: "The unexamined life is not worth living.", author: "Socrates", tag: "Philosophy" },
+    { text: "Whether you think you can, or you think you can't, you're right.", author: "Henry Ford", tag: "Mindset" },
+    { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt", tag: "Ambition" },
+    { text: "Simplicity is the ultimate sophistication.", author: "Leonardo da Vinci", tag: "Design" },
+    { text: "An expert is a person who has made all the mistakes that can be made in a very narrow field.", author: "Niels Bohr", tag: "Expertise" },
+    { text: "The measure of intelligence is the ability to change.", author: "Albert Einstein", tag: "Growth" },
+    { text: "Science is a way of thinking much more than it is a body of knowledge.", author: "Carl Sagan", tag: "Science" },
+    { text: "Any sufficiently advanced technology is indistinguishable from magic.", author: "Arthur C. Clarke", tag: "Technology" },
+    { text: "The most damaging phrase in the language is: it's always been done this way.", author: "Grace Hopper", tag: "Innovation" },
+    { text: "Robots will not replace humans, they will make our jobs more human.", author: "Illah Nourbakhsh", tag: "Robotics" },
+    { text: "The real problem is not whether machines think but whether men do.", author: "B.F. Skinner", tag: "AI" },
+    { text: "We are stuck with technology when what we really want is just stuff that works.", author: "Douglas Adams", tag: "Technology" },
+    { text: "Machines take me by surprise with great frequency.", author: "Alan Turing", tag: "AI" },
+    { text: "The question of whether a computer can think is no more interesting than the question of whether a submarine can swim.", author: "Edsger W. Dijkstra", tag: "Computing" },
+    { text: "First, solve the problem. Then, write the code.", author: "John Johnson", tag: "Engineering" },
+    { text: "Engineering is the art of directing the great sources of power in nature for the use and convenience of people.", author: "Thomas Tredgold", tag: "Engineering" },
+    { text: "Every great advance in science has issued from a new audacity of imagination.", author: "John Dewey", tag: "Science" },
+    { text: "I have not failed. I've just found 10,000 ways that won't work.", author: "Thomas Edison", tag: "Persistence" },
+    { text: "The best way to predict the future is to invent it.", author: "Alan Kay", tag: "Innovation" },
+    { text: "Talk is cheap. Show me the code.", author: "Linus Torvalds", tag: "Engineering" },
+    { text: "Programs must be written for people to read, and only incidentally for machines to execute.", author: "Harold Abelson", tag: "Programming" },
+    { text: "The art of programming is the art of organizing complexity.", author: "Edsger W. Dijkstra", tag: "Programming" },
+    { text: "Curiosity is the engine of achievement.", author: "Ken Robinson", tag: "Curiosity" },
+    { text: "Not everything that counts can be counted, and not everything that can be counted counts.", author: "William Bruce Cameron", tag: "Wisdom" },
+    { text: "You can't connect the dots looking forward; you can only connect them looking backwards.", author: "Steve Jobs", tag: "Perspective" },
+    { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill", tag: "Resilience" },
+    { text: "A person who never made a mistake never tried anything new.", author: "Albert Einstein", tag: "Growth" },
+    { text: "Do not go where the path may lead, go instead where there is no path and leave a trail.", author: "Ralph Waldo Emerson", tag: "Ambition" },
+    { text: "What we know is a drop, what we don't know is an ocean.", author: "Isaac Newton", tag: "Knowledge" },
+    { text: "Everything should be made as simple as possible, but not simpler.", author: "Albert Einstein", tag: "Design" },
+    { text: "The only limit to our realization of tomorrow is our doubts of today.", author: "Franklin D. Roosevelt", tag: "Ambition" },
+    { text: "Give me six hours to chop down a tree and I will spend the first four sharpening the axe.", author: "Abraham Lincoln", tag: "Preparation" },
+  ];
+
+  let lastIndex = -1;
+
+  const quoteText = document.getElementById('quoteText');
+  const quoteAuthor = document.getElementById('quoteAuthor');
+  const quoteTag = document.getElementById('quoteTag');
+  const quoteNumber = document.getElementById('quoteNumber');
+  const totalCount = document.getElementById('totalCount');
+  const newBtn = document.getElementById('newBtn');
+  const copyBtn = document.getElementById('copyBtn');
+
+  totalCount.textContent = quotes.length;
+
+  function pickIndex() {
+    if (quotes.length === 1) return 0;
+    let idx;
+    do {
+      idx = Math.floor(Math.random() * quotes.length);
+    } while (idx === lastIndex);
+    return idx;
+  }
+
+  function showQuote() {
+    const idx = pickIndex();
+    lastIndex = idx;
+    const q = quotes[idx];
+
+    quoteText.style.opacity = 0;
+    document.querySelector('.author-row').style.opacity = 0;
+
+    setTimeout(() => {
+      quoteText.textContent = q.text;
+      quoteAuthor.textContent = `— ${q.author}`;
+      quoteTag.textContent = q.tag;
+      quoteNumber.textContent = String(idx + 1).padStart(2, '0');
+      quoteText.style.opacity = 1;
+      document.querySelector('.author-row').style.opacity = 1;
+    }, 180);
+  }
+
+  function copyQuote() {
+    const q = quotes[lastIndex];
+    const str = `"${q.text}" — ${q.author}`;
+    navigator.clipboard.writeText(str).then(() => {
+      copyBtn.classList.add('copied');
+      copyBtn.textContent = '✓';
+      setTimeout(() => {
+        copyBtn.classList.remove('copied');
+        copyBtn.textContent = '⧉';
+      }, 1400);
+    });
+  }
+
+  newBtn.addEventListener('click', showQuote);
+  copyBtn.addEventListener('click', copyQuote);
+
+  showQuote();
+</script>
+
+</body>
+</html>
