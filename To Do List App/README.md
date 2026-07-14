@@ -1,4 +1,4 @@
-# To-Do List App
+# Mahrukh's app — To-Do List App
 
 A CRUD to-do list with persistent storage, filtering, and a clean minimalist interface.
 
