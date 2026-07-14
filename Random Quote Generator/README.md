@@ -1,4 +1,4 @@
-# Mahrukh's Website — Random Quote Generator
+# Mahrukh's App — Random Quote Generator
 
 A single-file random quote generator with a literary, "reading room" visual style, a built-in collection of 35 quotes (mixing general motivation with tech, science, and robotics/AI themed lines), and a copy-to-clipboard button.
 
