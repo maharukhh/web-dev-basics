@@ -1,4 +1,4 @@
-# ⏳ Countdown Timer
+# **Mahrukh's app — Countdown Timer
 
 A responsive countdown timer built with vanilla HTML, CSS, and JavaScript.
 
