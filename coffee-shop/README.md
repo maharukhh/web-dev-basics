@@ -5,6 +5,8 @@ first task in a series before any backend work gets wired in. The
 goal here was to prove a clean, component-based frontend, not to
 build anything feature-heavy.
 
+# Live Website 
+https://mahhrukhh.github.io/coffee-shop/
 
 ## Framework Choice
 
