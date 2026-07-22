@@ -69,4 +69,5 @@ frontend fundamentals that support end-to-end project building.
 ## Author
 
 *Mahrukh*
+
 Robotics and Intelligence Systems Student
