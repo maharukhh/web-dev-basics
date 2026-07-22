@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mahrukh's Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #e4e9f0;
+    --shadow-light: #ffffff;
+    --shadow-dark: #b8c1cf;
+    --text: #2b3546;
+    --text-dim: #7e8aa0;
+    --accent: #ff7a59;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    font-family: 'JetBrains Mono', monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .calc {
+    width: 100%;
+    max-width: 340px;
+    background: var(--bg);
+    border-radius: 28px;
+    padding: 26px;
+    box-shadow: 10px 10px 24px var(--shadow-dark), -10px -10px 24px var(--shadow-light);
+  }
+  .display {
+    background: var(--bg);
+    border-radius: 18px;
+    padding: 26px 20px 20px;
+    margin-bottom: 22px;
+    text-align: right;
+    box-shadow: inset 6px 6px 14px var(--shadow-dark), inset -6px -6px 14px var(--shadow-light);
+  }
+  .prev { font-size: 13px; color: var(--text-dim); min-height: 16px; overflow-x: auto; }
+  .curr { font-size: 34px; color: var(--text); font-weight: 500; overflow-x: auto; white-space: nowrap; }
+  .pad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  button {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--text);
+    background: var(--bg);
+    border: none;
+    border-radius: 14px;
+    padding: 16px 0;
+    cursor: pointer;
+    box-shadow: 5px 5px 12px var(--shadow-dark), -5px -5px 12px var(--shadow-light);
+  }
+  button:active {
+    box-shadow: inset 4px 4px 10px var(--shadow-dark), inset -4px -4px 10px var(--shadow-light);
+  }
+  button.op { color: var(--accent); }
+  button.equals { background: var(--accent); color: #fff; box-shadow: 5px 5px 12px var(--shadow-dark), -5px -5px 12px var(--shadow-light); }
+  button.span2 { grid-column: span 2; }
+</style>
+</head>
+<body>
+
+<div class="calc">
+  <div class="display">
+    <div class="prev" id="prevOp">&nbsp;</div>
+    <div class="curr" id="currOp">0</div>
+  </div>
+  <div class="pad">
+    <button onclick="clearAll()">AC</button>
+    <button onclick="deleteLast()">DEL</button>
+    <button onclick="chooseOp('%')" class="op">%</button>
+    <button onclick="chooseOp('÷')" class="op">÷</button>
+
+    <button onclick="appendNum('7')">7</button>
+    <button onclick="appendNum('8')">8</button>
+    <button onclick="appendNum('9')">9</button>
+    <button onclick="chooseOp('×')" class="op">×</button>
+
+    <button onclick="appendNum('4')">4</button>
+    <button onclick="appendNum('5')">5</button>
+    <button onclick="appendNum('6')">6</button>
+    <button onclick="chooseOp('-')" class="op">−</button>
+
+    <button onclick="appendNum('1')">1</button>
+    <button onclick="appendNum('2')">2</button>
+    <button onclick="appendNum('3')">3</button>
+    <button onclick="chooseOp('+')" class="op">+</button>
+
+    <button onclick="appendNum('0')" class="span2">0</button>
+    <button onclick="appendNum('.')">.</button>
+    <button onclick="compute()" class="equals">=</button>
+  </div>
+</div>
+
+<script>
+  let current = '0';
+  let previous = '';
+  let operation = null;
+  let resetNext = false;
+
+  const currEl = document.getElementById('currOp');
+  const prevEl = document.getElementById('prevOp');
+
+  function updateDisplay() {
+    currEl.textContent = current;
+    prevEl.textContent = previous ? `${previous} ${operation}` : '\u00A0';
+  }
+
+  function appendNum(num) {
+    if (resetNext) { current = '0'; resetNext = false; }
+    if (num === '.' && current.includes('.')) return;
+    current = current === '0' && num !== '.' ? num : current + num;
+    updateDisplay();
+  }
+
+  function chooseOp(op) {
+    if (operation !== null && !resetNext) compute();
+    previous = current;
+    operation = op;
+    resetNext = true;
+    updateDisplay();
+  }
+
+  function compute() {
+    if (operation === null || resetNext) return;
+    const a = parseFloat(previous);
+    const b = parseFloat(current);
+    let result;
+    switch (operation) {
+      case '+': result = a + b; break;
+      case '-': result = a - b; break;
+      case '×': result = a * b; break;
+      case '÷': result = b === 0 ? 'Error' : a / b; break;
+      case '%': result = a % b; break;
+      default: return;
+    }
+    current = typeof result === 'number' ? String(Math.round(result * 1e10) / 1e10) : result;
+    operation = null;
+    previous = '';
+    resetNext = true;
+    updateDisplay();
+  }
+
+  function clearAll() {
+    current = '0'; previous = ''; operation = null; resetNext = false;
+    updateDisplay();
+  }
+
+  function deleteLast() {
+    current = current.length > 1 ? current.slice(0, -1) : '0';
+    updateDisplay();
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key >= '0' && e.key <= '9') appendNum(e.key);
+    else if (e.key === '.') appendNum('.');
+    else if (e.key === '+') chooseOp('+');
+    else if (e.key === '-') chooseOp('-');
+    else if (e.key === '*') chooseOp('×');
+    else if (e.key === '/') { e.preventDefault(); chooseOp('÷'); }
+    else if (e.key === 'Enter' || e.key === '=') compute();
+    else if (e.key === 'Backspace') deleteLast();
+    else if (e.key === 'Escape') clearAll();
+  });
+</script>
+
+</body>
+</html>
