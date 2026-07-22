@@ -29,7 +29,7 @@ full-stack development.
 | ✅ To-Do List App | localStorage, CRUD operations |
 | ✅ Random Quote Generator | Array/object data handling, DOM updates |
 | ✅ Countdown Timer	Date calculations, interval functions |
-| Calculator | DOM manipulation, event handling |
+| ✅ Calculator | DOM manipulation, event handling |
 | Digital Clock with Alarms | Date/Time API, timers |
 | BMI Calculator | Form input handling, conditional logic |
 | Unit Converter | Multi-unit conversion logic |
