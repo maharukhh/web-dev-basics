@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rock Paper Scissors</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fef6ec;
+    --card: #ffffff;
+    --line: #f2e4cf;
+    --text: #3a2e1f;
+    --text-dim: #a8977e;
+    --win: #4a9d6f;
+    --lose: #d4634f;
+    --tie: #d9a441;
+    --accent: #ff8c42;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    font-family: 'Poppins', sans-serif;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .app { width: 100%; max-width: 480px; text-align: center; }
+
+  h1 { font-size: 22px; font-weight: 700; margin: 0 0 6px; }
+  .sub { font-size: 13px; color: var(--text-dim); margin-bottom: 22px; }
+
+  .score-row {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 26px;
+  }
+  .score-box { text-align: center; }
+  .score-num { font-size: 32px; font-weight: 800; }
+  .score-lbl { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .arena {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 26px 20px;
+    margin-bottom: 22px;
+    min-height: 130px;
+  }
+  .vs-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 14px;
+  }
+  .pick {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    border: 2px solid var(--line);
+  }
+  .vs-label { font-size: 12px; color: var(--text-dim); font-weight: 600; }
+
+  .result-text {
+    font-size: 15px;
+    font-weight: 700;
+    min-height: 20px;
+  }
+  .result-text.win { color: var(--win); }
+  .result-text.lose { color: var(--lose); }
+  .result-text.tie { color: var(--tie); }
+
+  .choices {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+  }
+  .choice-btn {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 2px solid var(--line);
+    font-size: 32px;
+    cursor: pointer;
+  }
+  .choice-btn:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .choice-btn:active { transform: translateY(0); }
+
+  .reset-btn {
+    margin-top: 22px;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <h1>Rock · Paper · Scissors</h1>
+  <div class="sub">Pick your move — first to feel lucky wins.</div>
+
+  <div class="score-row">
+    <div class="score-box"><div class="score-num" id="playerScore">0</div><div class="score-lbl">You</div></div>
+    <div class="score-box"><div class="score-num" id="tieScore">0</div><div class="score-lbl">Ties</div></div>
+    <div class="score-box"><div class="score-num" id="cpuScore">0</div><div class="score-lbl">Computer</div></div>
+  </div>
+
+  <div class="arena">
+    <div class="vs-row">
+      <div class="pick" id="playerPick">❔</div>
+      <div class="vs-label">VS</div>
+      <div class="pick" id="cpuPick">❔</div>
+    </div>
+    <div class="result-text" id="resultText">Make your move</div>
+  </div>
+
+  <div class="choices">
+    <button class="choice-btn" data-choice="rock">🪨</button>
+    <button class="choice-btn" data-choice="paper">📄</button>
+    <button class="choice-btn" data-choice="scissors">✂️</button>
+  </div>
+
+  <button class="reset-btn" id="resetBtn">Reset scores</button>
+</div>
+
+<script>
+  const ICONS = { rock: '🪨', paper: '📄', scissors: '✂️' };
+  const BEATS = { rock: 'scissors', paper: 'rock', scissors: 'paper' };
+
+  const playerScoreEl = document.getElementById('playerScore');
+  const cpuScoreEl = document.getElementById('cpuScore');
+  const tieScoreEl = document.getElementById('tieScore');
+  const playerPickEl = document.getElementById('playerPick');
+  const cpuPickEl = document.getElementById('cpuPick');
+  const resultText = document.getElementById('resultText');
+  const resetBtn = document.getElementById('resetBtn');
+
+  let scores = { player: 0, cpu: 0, tie: 0 };
+
+  function play(choice) {
+    const options = Object.keys(ICONS);
+    const cpuChoice = options[Math.floor(Math.random() * options.length)];
+
+    playerPickEl.textContent = ICONS[choice];
+    cpuPickEl.textContent = ICONS[cpuChoice];
+
+    let outcome;
+    if (choice === cpuChoice) {
+      outcome = 'tie';
+      scores.tie++;
+      resultText.textContent = "It's a tie!";
+      resultText.className = 'result-text tie';
+    } else if (BEATS[choice] === cpuChoice) {
+      outcome = 'win';
+      scores.player++;
+      resultText.textContent = `You win! ${cap(choice)} beats ${cap(cpuChoice)}.`;
+      resultText.className = 'result-text win';
+    } else {
+      outcome = 'lose';
+      scores.cpu++;
+      resultText.textContent = `You lose. ${cap(cpuChoice)} beats ${cap(choice)}.`;
+      resultText.className = 'result-text lose';
+    }
+
+    updateScores();
+  }
+
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  function updateScores() {
+    playerScoreEl.textContent = scores.player;
+    cpuScoreEl.textContent = scores.cpu;
+    tieScoreEl.textContent = scores.tie;
+  }
+
+  document.querySelectorAll('.choice-btn').forEach(btn => {
+    btn.addEventListener('click', () => play(btn.dataset.choice));
+  });
+
+  resetBtn.addEventListener('click', () => {
+    scores = { player: 0, cpu: 0, tie: 0 };
+    updateScores();
+    playerPickEl.textContent = '❔';
+    cpuPickEl.textContent = '❔';
+    resultText.textContent = 'Make your move';
+    resultText.className = 'result-text';
+  });
+</script>
+
+</body>
+</html>
