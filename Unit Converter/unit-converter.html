@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit Converter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3f0fa;
+    --card: #ffffff;
+    --line: #e4ddf5;
+    --text: #2a2440;
+    --text-dim: #857f9e;
+    --purple: #6c4fd6;
+    --purple-soft: #ede8fb;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    font-family: 'Sora', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    color: var(--text);
+  }
+  .card {
+    width: 100%;
+    max-width: 440px;
+    background: var(--card);
+    border-radius: 20px;
+    padding: 30px 26px;
+    border: 1px solid var(--line);
+  }
+  h1 { font-size: 20px; margin: 0 0 20px; font-weight: 700; }
+
+  .tabs {
+    display: flex;
+    background: var(--bg);
+    border-radius: 30px;
+    padding: 4px;
+    margin-bottom: 24px;
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    background: none;
+    border: none;
+    font-family: 'Sora', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-dim);
+    padding: 9px 0;
+    border-radius: 24px;
+    cursor: pointer;
+  }
+  .tab.active { background: var(--purple); color: #fff; }
+
+  .convert-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .field { flex: 1; }
+  .field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+  input[type="number"], select {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    font-family: 'Sora', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    outline: none;
+    background: #fff;
+  }
+  input:focus, select:focus { border-color: var(--purple); }
+
+  .swap-btn {
+    background: var(--purple-soft);
+    border: none;
+    color: var(--purple);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 18px;
+  }
+  .swap-btn:hover { background: var(--purple); color: #fff; }
+
+  .result-box {
+    background: var(--purple-soft);
+    border-radius: 14px;
+    padding: 18px;
+    text-align: center;
+    margin-top: 8px;
+  }
+  .result-value {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--purple);
+    line-height: 1.2;
+  }
+  .result-note {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>Unit Converter</h1>
+
+  <div class="tabs">
+    <button class="tab active" data-type="length">Length</button>
+    <button class="tab" data-type="weight">Weight</button>
+    <button class="tab" data-type="temp">Temperature</button>
+  </div>
+
+  <div class="convert-row">
+    <div class="field">
+      <label>From</label>
+      <input type="number" id="fromValue" placeholder="0" value="1">
+      <select id="fromUnit"></select>
+    </div>
+    <button class="swap-btn" id="swapBtn">⇄</button>
+    <div class="field">
+      <label>To</label>
+      <select id="toUnit"></select>
+    </div>
+  </div>
+
+  <div class="result-box">
+    <div class="result-value" id="resultValue">—</div>
+    <div class="result-note" id="resultNote">Enter a value above</div>
+  </div>
+</div>
+
+<script>
+  const UNITS = {
+    length: {
+      label: 'Length',
+      base: 'm',
+      units: {
+        mm: 0.001, cm: 0.01, m: 1, km: 1000,
+        in: 0.0254, ft: 0.3048, yd: 0.9144, mi: 1609.344
+      }
+    },
+    weight: {
+      label: 'Weight',
+      base: 'kg',
+      units: {
+        mg: 0.000001, g: 0.001, kg: 1, t: 1000,
+        oz: 0.0283495, lb: 0.453592
+      }
+    },
+    temp: {
+      label: 'Temperature',
+      units: { C: 'C', F: 'F', K: 'K' }
+    }
+  };
+
+  const tabs = document.querySelectorAll('.tab');
+  const fromValue = document.getElementById('fromValue');
+  const fromUnit = document.getElementById('fromUnit');
+  const toUnit = document.getElementById('toUnit');
+  const swapBtn = document.getElementById('swapBtn');
+  const resultValue = document.getElementById('resultValue');
+  const resultNote = document.getElementById('resultNote');
+
+  let currentType = 'length';
+
+  function populateUnits(type) {
+    const keys = Object.keys(UNITS[type].units);
+    fromUnit.innerHTML = keys.map(k => `<option value="${k}">${k}</option>`).join('');
+    toUnit.innerHTML = keys.map(k => `<option value="${k}">${k}</option>`).join('');
+    fromUnit.value = keys[0];
+    toUnit.value = keys[1] || keys[0];
+  }
+
+  function convertTemp(value, from, to) {
+    let celsius;
+    if (from === 'C') celsius = value;
+    else if (from === 'F') celsius = (value - 32) * 5 / 9;
+    else celsius = value - 273.15;
+
+    if (to === 'C') return celsius;
+    if (to === 'F') return celsius * 9 / 5 + 32;
+    return celsius + 273.15;
+  }
+
+  function convert() {
+    const val = parseFloat(fromValue.value);
+    if (isNaN(val)) {
+      resultValue.textContent = '—';
+      resultNote.textContent = 'Enter a value above';
+      return;
+    }
+
+    let result;
+    if (currentType === 'temp') {
+      result = convertTemp(val, fromUnit.value, toUnit.value);
+    } else {
+      const unitDef = UNITS[currentType].units;
+      const baseValue = val * unitDef[fromUnit.value];
+      result = baseValue / unitDef[toUnit.value];
+    }
+
+    resultValue.textContent = `${trimNum(result)} ${toUnit.value}`;
+    resultNote.textContent = `${trimNum(val)} ${fromUnit.value} = ${trimNum(result)} ${toUnit.value}`;
+  }
+
+  function trimNum(n) {
+    return parseFloat(n.toFixed(6)).toString();
+  }
+
+  function switchType(type) {
+    currentType = type;
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.type === type));
+    populateUnits(type);
+    convert();
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => switchType(tab.dataset.type));
+  });
+
+  swapBtn.addEventListener('click', () => {
+    const tmp = fromUnit.value;
+    fromUnit.value = toUnit.value;
+    toUnit.value = tmp;
+    convert();
+  });
+
+  [fromValue, fromUnit, toUnit].forEach(el => {
+    el.addEventListener('input', convert);
+    el.addEventListener('change', convert);
+  });
+
+  populateUnits('length');
+  convert();
+</script>
+
+</body>
+</html>
