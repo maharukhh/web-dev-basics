@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Carousel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e1116;
+    --panel: #171b22;
+    --line: #2a303a;
+    --text: #eef1f5;
+    --text-dim: #8a93a1;
+    --accent: #4fa3ff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .carousel-wrap {
+    width: 100%;
+    max-width: 640px;
+  }
+
+  .carousel {
+    position: relative;
+    width: 100%;
+    height: 380px;
+    border-radius: 18px;
+    overflow: hidden;
+    background: var(--panel);
+    border: 1px solid var(--line);
+  }
+
+  .slides { display: flex; height: 100%; transition: transform 0.45s cubic-bezier(0.65, 0, 0.35, 1); }
+  .slide {
+    flex: 0 0 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px;
+    position: relative;
+  }
+  .slide-icon { font-size: 50px; margin-bottom: 16px; }
+  .slide-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .slide-desc { font-size: 14px; color: rgba(255,255,255,0.85); max-width: 380px; line-height: 1.5; }
+
+  .nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.35);
+    border: none;
+    color: #fff;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    z-index: 5;
+  }
+  .nav-btn:hover { background: rgba(0,0,0,0.55); }
+  .nav-prev { left: 14px; }
+  .nav-next { right: 14px; }
+
+  .dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--line);
+    cursor: pointer;
+    border: none;
+    padding: 0;
+  }
+  .dot.active { background: var(--accent); width: 22px; border-radius: 5px; }
+
+  .footer-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .autoplay-toggle {
+    background: none;
+    border: 1px solid var(--line);
+    color: var(--text-dim);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+  .autoplay-toggle.on { border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="carousel-wrap">
+  <div class="carousel">
+    <div class="slides" id="slides"></div>
+    <button class="nav-btn nav-prev" id="prevBtn">‹</button>
+    <button class="nav-btn nav-next" id="nextBtn">›</button>
+  </div>
+  <div class="dots" id="dots"></div>
+  <div class="footer-row">
+    <span id="slideCounter">1 / 5</span>
+    <button class="autoplay-toggle on" id="autoplayBtn">⏸ Autoplay on</button>
+  </div>
+</div>
+
+<script>
+  const slidesData = [
+    { icon: '🌄', title: 'Mountain Sunrise', desc: 'Golden light breaking over layered ridgelines at dawn.', gradient: 'linear-gradient(135deg, #ff9d6c, #4a6fa5)' },
+    { icon: '🌊', title: 'Coastal Waves', desc: 'Turquoise water rolling gently onto white sand.', gradient: 'linear-gradient(135deg, #1cb5e0, #000851)' },
+    { icon: '🌲', title: 'Forest Path', desc: 'Sunlight filtering through tall pines on a quiet trail.', gradient: 'linear-gradient(135deg, #134e5e, #71b280)' },
+    { icon: '🏙️', title: 'City Skyline', desc: 'Skyscrapers lit up against a deep evening sky.', gradient: 'linear-gradient(135deg, #232526, #414345)' },
+    { icon: '🌌', title: 'Night Sky', desc: 'A wide field of stars stretching over open desert.', gradient: 'linear-gradient(135deg, #0f2027, #2c5364)' },
+  ];
+
+  const slidesEl = document.getElementById('slides');
+  const dotsEl = document.getElementById('dots');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const counter = document.getElementById('slideCounter');
+  const autoplayBtn = document.getElementById('autoplayBtn');
+
+  let current = 0;
+  let autoplay = true;
+  let timer = null;
+
+  slidesEl.innerHTML = slidesData.map(s => `
+    <div class="slide" style="background:${s.gradient}">
+      <div class="slide-icon">${s.icon}</div>
+      <div class="slide-title">${s.title}</div>
+      <div class="slide-desc">${s.desc}</div>
+    </div>
+  `).join('');
+
+  dotsEl.innerHTML = slidesData.map((_, i) => `<button class="dot" data-index="${i}"></button>`).join('');
+  const dots = document.querySelectorAll('.dot');
+
+  function update() {
+    slidesEl.style.transform = `translateX(-${current * 100}%)`;
+    dots.forEach((d, i) => d.classList.toggle('active', i === current));
+    counter.textContent = `${current + 1} / ${slidesData.length}`;
+  }
+
+  function goTo(index) {
+    current = (index + slidesData.length) % slidesData.length;
+    update();
+  }
+
+  function next() { goTo(current + 1); }
+  function prev() { goTo(current - 1); }
+
+  function startAutoplay() {
+    timer = setInterval(next, 3500);
+  }
+  function stopAutoplay() {
+    if (timer) clearInterval(timer);
+  }
+
+  prevBtn.addEventListener('click', () => { prev(); stopAutoplay(); if (autoplay) startAutoplay(); });
+  nextBtn.addEventListener('click', () => { next(); stopAutoplay(); if (autoplay) startAutoplay(); });
+  dots.forEach(dot => dot.addEventListener('click', () => {
+    goTo(parseInt(dot.dataset.index));
+    stopAutoplay();
+    if (autoplay) startAutoplay();
+  }));
+
+  autoplayBtn.addEventListener('click', () => {
+    autoplay = !autoplay;
+    autoplayBtn.textContent = autoplay ? '⏸ Autoplay on' : '▶ Autoplay off';
+    autoplayBtn.classList.toggle('on', autoplay);
+    if (autoplay) startAutoplay(); else stopAutoplay();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') { prev(); stopAutoplay(); if (autoplay) startAutoplay(); }
+    if (e.key === 'ArrowRight') { next(); stopAutoplay(); if (autoplay) startAutoplay(); }
+  });
+
+  // basic touch swipe support
+  let touchStartX = 0;
+  const carouselEl = document.querySelector('.carousel');
+  carouselEl.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+  carouselEl.addEventListener('touchend', (e) => {
+    const diff = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(diff) > 40) {
+      if (diff < 0) next(); else prev();
+      stopAutoplay();
+      if (autoplay) startAutoplay();
+    }
+  });
+
+  update();
+  startAutoplay();
+</script>
+
+</body>
+</html>
