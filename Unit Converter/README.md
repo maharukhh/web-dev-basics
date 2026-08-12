@@ -1,37 +1,35 @@
 # Unit Converter
 
-A multi-category unit converter supporting Length, Weight, and Temperature conversions.
+A single-page unit converter with three categories — Length, Weight, and Temperature — featuring a clean tabbed interface and instant, live conversion as you type.
 
 ## Features
-- Three conversion categories: Length, Weight, Temperature
-- Length: mm, cm, m, km, in, ft, yd, mi
-- Weight: mg, g, kg, t, oz, lb
-- Temperature: Celsius, Fahrenheit, Kelvin
-- Swap button to instantly reverse the "from" and "to" units
-- Live conversion as you type — no submit button needed
-
-## How to Run
-1. Opens in any browser — no installation or server needed
-2. Pick a category tab, enter a value, and choose your "from" and "to" units
+- Three conversion categories: Length, Weight, and Temperature, switchable via tabs
+- Live conversion — updates instantly as you type or change units, no "Convert" button needed
+- Swap button to instantly flip the "From" and "To" units
+- Clean, minimal card-based UI with a custom Google Fonts typeface
 
 ## How It Works
-- **Length and Weight** conversions work by converting the input value to a common base unit (meters for length, kilograms for weight) using a lookup table of conversion factors, then converting from that base unit to the target unit.
-- **Temperature** conversion is handled separately since it requires formulas rather than simple multiplication (e.g. `F = C × 9/5 + 32`), so the app converts everything through Celsius as an intermediate step.
-- Switching tabs repopulates the unit dropdowns for that category and re-runs the conversion automatically.
+- **Length and Weight** conversions work by defining every unit relative to a common base unit (meters for length, kilograms for weight). The input value is first converted to the base unit, then converted from the base unit to the target unit.
+- **Temperature** conversion is handled separately with dedicated formulas (Celsius, Fahrenheit, Kelvin), since temperature scales don't share a simple multiplicative relationship the way length/weight units do.
+- Switching category tabs repopulates the "From" and "To" dropdowns with the relevant units and re-runs the conversion.
+- Every input, dropdown change, and tab switch triggers an immediate recalculation via event listeners — the result updates live with no page reload or button click.
 
 ## Tech Used
 - Plain HTML, CSS, and JavaScript (no frameworks)
 - Google Fonts (Sora)
 
 ## Key Concepts Practiced
-- Multi-unit conversion logic
-- Working with lookup tables / conversion factors
-- Conditional formulas (temperature vs. linear unit conversion)
+- Unit conversion logic (base-unit normalization)
+- DOM manipulation and dynamic dropdown population
+- Event-driven live UI updates
+- Basic UI/UX design (tabs, card layout)
 
 ## Possible Improvements
 - Add more categories (area, volume, speed, data storage)
-- Add a "copy result" button
-- Remember the last-used category and units between visits
+- Add a dark mode toggle
+- Remember the last-used category and units between visits (e.g. via `localStorage`)
+- Add copy-to-clipboard for the result
 
 ## Known Limitations
-- Very large or very small numbers may show in a slightly rounded form due to floating-point precision
+- Requires an internet connection to load the Google Fonts stylesheet — the converter itself still works offline, but falls back to the browser's default font without internet
+- Results are rounded/trimmed to 6 decimal places, so extremely precise conversions may lose a small amount of accuracy in display
