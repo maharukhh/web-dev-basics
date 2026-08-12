@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mahrukh's Digital Clock & Alarms</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f14;
+    --panel: #12181f;
+    --line: #232c36;
+    --led: #ff5a36;
+    --led-dim: #4a2a1e;
+    --text-dim: #62707d;
+    --text: #dbe4ec;
+    --danger: #ff5f56;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .wrap { width: 100%; max-width: 460px; }
+
+  .clock-panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 36px 20px 26px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .time {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(40px, 11vw, 62px);
+    font-weight: 700;
+    color: var(--led);
+    text-shadow: 0 0 20px rgba(255,90,54,0.35);
+    letter-spacing: 0.02em;
+  }
+  .date {
+    font-size: 13px;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+    margin-top: 8px;
+    text-transform: uppercase;
+  }
+
+  .section-title {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+
+  .add-alarm {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  input[type="time"], input[type="text"] {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    outline: none;
+  }
+  input[type="time"] { flex: 0 0 auto; }
+  input[type="text"] { flex: 1; min-width: 0; }
+  input:focus { border-color: var(--led); }
+
+  .add-btn {
+    background: var(--led);
+    color: #14100e;
+    border: none;
+    border-radius: 8px;
+    padding: 0 16px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+  }
+  .add-btn:hover { filter: brightness(1.1); }
+
+  .alarm-list { display: flex; flex-direction: column; gap: 8px; }
+  .alarm {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .alarm.disabled { opacity: 0.45; }
+  .alarm-time { font-family: 'Space Mono', monospace; font-size: 20px; font-weight: 700; }
+  .alarm-label { flex: 1; font-size: 12px; color: var(--text-dim); }
+
+  .toggle {
+    width: 38px;
+    height: 20px;
+    background: var(--line);
+    border-radius: 20px;
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .toggle.on { background: var(--led); }
+  .toggle-knob {
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 16px; height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    transition: left 0.15s ease;
+  }
+  .toggle.on .toggle-knob { left: 20px; }
+
+  .del-btn {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 15px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .del-btn:hover { color: var(--danger); }
+
+  .empty { text-align: center; color: var(--text-dim); font-size: 13px; padding: 20px 0; }
+
+  .ringing-banner {
+    display: none;
+    background: var(--led);
+    color: #14100e;
+    text-align: center;
+    padding: 14px;
+    border-radius: 10px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    cursor: pointer;
+  }
+  .ringing-banner.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="clock-panel">
+    <div class="time" id="timeDisplay">00:00:00</div>
+    <div class="date" id="dateDisplay">—</div>
+  </div>
+
+  <div class="ringing-banner" id="ringingBanner">⏰ Alarm ringing — click to dismiss</div>
+
+  <div class="section-title">Add Alarm</div>
+  <div class="add-alarm">
+    <input type="time" id="alarmTimeInput">
+    <input type="text" id="alarmLabelInput" placeholder="Label (optional)" maxlength="30">
+    <button class="add-btn" id="addAlarmBtn">Add</button>
+  </div>
+
+  <div class="section-title">Alarms</div>
+  <div class="alarm-list" id="alarmList"></div>
+</div>
+
+<script>
+  const timeDisplay = document.getElementById('timeDisplay');
+  const dateDisplay = document.getElementById('dateDisplay');
+  const alarmTimeInput = document.getElementById('alarmTimeInput');
+  const alarmLabelInput = document.getElementById('alarmLabelInput');
+  const addAlarmBtn = document.getElementById('addAlarmBtn');
+  const alarmList = document.getElementById('alarmList');
+  const ringingBanner = document.getElementById('ringingBanner');
+
+  const STORAGE_KEY = 'clock_alarms_v1';
+  let alarms = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  let ringingId = null;
+  let audioCtx = null;
+  let beepInterval = null;
+
+  function save() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(alarms));
+  }
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function updateClock() {
+    const now = new Date();
+    timeDisplay.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    dateDisplay.textContent = now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    const currentHM = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    if (now.getSeconds() === 0) {
+      alarms.forEach(a => {
+        if (a.enabled && a.time === currentHM && ringingId === null) {
+          triggerAlarm(a.id);
+        }
+      });
+    }
+  }
+
+  function beep() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'square';
+      osc.frequency.value = 880;
+      gain.gain.value = 0.08;
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      setTimeout(() => osc.stop(), 220);
+    } catch (e) {}
+  }
+
+  function triggerAlarm(id) {
+    ringingId = id;
+    ringingBanner.classList.add('show');
+    beep();
+    beepInterval = setInterval(beep, 700);
+  }
+
+  function dismissAlarm() {
+    ringingId = null;
+    ringingBanner.classList.remove('show');
+    if (beepInterval) clearInterval(beepInterval);
+  }
+
+  ringingBanner.addEventListener('click', dismissAlarm);
+
+  function render() {
+    if (alarms.length === 0) {
+      alarmList.innerHTML = '<div class="empty">No alarms set.</div>';
+      return;
+    }
+    alarms.sort((a, b) => a.time.localeCompare(b.time));
+    alarmList.innerHTML = alarms.map(a => `
+      <div class="alarm ${a.enabled ? '' : 'disabled'}">
+        <div class="alarm-time">${a.time}</div>
+        <div class="alarm-label">${escapeHtml(a.label || 'Alarm')}</div>
+        <div class="toggle ${a.enabled ? 'on' : ''}" onclick="toggleAlarm(${a.id})"><div class="toggle-knob"></div></div>
+        <button class="del-btn" onclick="deleteAlarm(${a.id})">✕</button>
+      </div>
+    `).join('');
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function addAlarm() {
+    if (!alarmTimeInput.value) return;
+    alarms.push({
+      id: Date.now(),
+      time: alarmTimeInput.value,
+      label: alarmLabelInput.value.trim(),
+      enabled: true
+    });
+    alarmTimeInput.value = '';
+    alarmLabelInput.value = '';
+    save();
+    render();
+  }
+
+  function toggleAlarm(id) {
+    const a = alarms.find(a => a.id === id);
+    if (a) a.enabled = !a.enabled;
+    save();
+    render();
+  }
+
+  function deleteAlarm(id) {
+    alarms = alarms.filter(a => a.id !== id);
+    if (ringingId === id) dismissAlarm();
+    save();
+    render();
+  }
+
+  window.toggleAlarm = toggleAlarm;
+  window.deleteAlarm = deleteAlarm;
+
+  addAlarmBtn.addEventListener('click', addAlarm);
+
+  setInterval(updateClock, 1000);
+  updateClock();
+  render();
+</script>
+
+</body>
+</html>
